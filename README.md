@@ -1,67 +1,46 @@
 # Carbohydrate Calculator Tests
 
-Three end-to-end tests for the [Calculator.net Carbohydrate Calculator](https://www.calculator.net/carbohydrate-calculator.html), using Java, Selenium WebDriver and JUnit.
+This project contains three automated tests for the [Carbohydrate Calculator](https://www.calculator.net/carbohydrate-calculator.html). The test numbers match the cases in the Excel test document.
 
-## Test coverage
+The tests use Java, Selenium to control Chrome, and JUnit to check the results. All three tests are in `src/test/java/CarbohydrateCalculatorTest.java`.
 
-| Test case | Scenario | Checks |
-| --- | --- | --- |
-| TC-005 | Metric / Mifflin-St Jeor | Calculated Calories and carbohydrate grams for all five goal rows, plus table headings and labels. |
-| TC-015 | Metric / Katch-McArdle | The same result checks with 20% Body Fat and the Katch formula. |
-| TC-020 | US / Katch-McArdle | Feet/inches and pounds inputs, selected unit mode and formula, table headings, US goal labels, and positive Calories and grams. |
+## What the tests check
 
-Each test opens a new Chrome session, enters its own inputs, clicks Calculate, checks the results and closes the browser. TC-020 checks result format and positive values; it does not verify exact US calculations.
+- **TC-005:** Enter Metric inputs and select Mifflin-St Jeor. Calculate the expected Calories and carbohydrate grams in the test, then compare them with all five rows on the website.
+- **TC-015:** Do the same using Katch-McArdle and 20% Body Fat.
+- **TC-020:** Enter height in feet/inches and weight in pounds, with Katch-McArdle selected. Check that the result table has the expected headings and goal names, and shows Calories and grams greater than zero. This test does not check the exact US calculation.
 
-## Requirements
+Each test opens its own browser and closes it when finished.
 
-- JDK 21
-- Apache Maven 3.9.x
-- Google Chrome
-- Internet access for the live website and dependency/driver downloads
+## How to run in IntelliJ IDEA
 
-Set JAVA_HOME to the JDK folder and make Java and Maven available on PATH. Confirm with `java -version` and `mvn -version`. Selenium Manager obtains ChromeDriver when needed.
+You need Java JDK 21, Google Chrome and an internet connection.
 
-## Run the tests
+1. Download this repository using **Code > Download ZIP**, then extract it.
+2. Open the extracted project folder in IntelliJ IDEA. It should contain `pom.xml`.
+3. Under **File > Project Structure > Project**, select JDK 21 as the SDK and set the language level to **SDK default**. If Java is not listed, use **Add JDK from disk** to select your JDK folder.
+4. Allow Maven to download the libraries listed in `pom.xml`.
+5. Open **src > test > java > CarbohydrateCalculatorTest**.
+6. Right-click the test class and choose **Run** to run all three tests. To run one test, use the green arrow beside that test method.
 
-Open a terminal in the project folder containing `pom.xml`.
+The Run panel shows which tests passed or failed. Chrome opens and closes during the tests. Selenium handles the ChromeDriver download when needed.
 
-Run all three tests:
+If Java and Maven are already set up on your command line, you can also run all three tests from the project folder with:
 
 ```shell
 mvn clean test
 ```
 
-Run only TC-005:
+## How the expected results are calculated
 
-```shell
-mvn test "-Dtest=CarbohydrateCalculatorTest#tc005_metricMifflinCalculation"
-```
+TC-005 and TC-015 use male, age 30, height 180 cm, weight 80 kg and sedentary activity. TC-015 also uses 20% Body Fat.
 
-Run with the Chrome window hidden:
+The tests use the Mifflin-St Jeor and Katch-McArdle formulas described on Calculator.net's [Calorie Calculator](https://www.calculator.net/calorie-calculator.html), with a sedentary multiplier of 1.2. The expected maintenance values are **2136 Calories** for TC-005 and **2103 Calories** after rounding for TC-015.
 
-```shell
-mvn test "-Dheadless=true"
-```
+For the other goal rows, the tests subtract or add 500 and 1000 Calories. They calculate carbohydrate grams using each column's percentage, divide by 3.75, then round the answer.
 
-In IntelliJ IDEA, open the project folder, set the Project SDK to JDK 21 and allow Maven to load the dependencies. Right-click `CarbohydrateCalculatorTest` under `src/test/java` and choose Run to execute all three tests.
+**Assumption:** the 500/1000 calorie changes and 3.75 Calories per gram are based on the site's current results. The assignment does not specify these rules, so they would need confirmation. For example, 2136 Calories at 40% gives 228 grams when divided by 3.75.
 
-Maven writes test reports to `target/surefire-reports`. A successful full run reports three tests with no failures or errors.
+## Test run
 
-## Expected values and assumptions
-
-Both Metric tests use male, age 30, height 180 cm, weight 80 kg and sedentary activity (factor 1.2). TC-015 also uses 20% Body Fat.
-
-- Mifflin-St Jeor: `(10 * 80 + 6.25 * 180 - 5 * 30 + 5) * 1.2 = 2136` maintenance Calories.
-- Katch-McArdle: `(370 + 21.6 * (1 - 0.20) * 80) * 1.2 = 2102.88`, displayed as 2103 maintenance Calories.
-
-The BMR formulas are described on Calculator.net's [Calorie Calculator](https://www.calculator.net/calorie-calculator.html). Expected Calories are calculated in the test, separately from the displayed results.
-
-The tests use observed calorie adjustments of -500/-1000 for weight loss and +500/+1000 for weight gain. Carbohydrate grams are calculated as expected Calories multiplied by the column percentage (40%, 55%, 65% or 75%), divided by 3.75, then rounded to a whole number.
-
-The 3.75 Calories/g conversion and goal adjustments follow observed site behavior. The assignment does not specify these rules, so they remain assumptions to confirm. For example, 2136 Calories at 40% gives 228 g on the site, consistent with dividing by 3.75. Using 4 Calories/g would give 214 g.
-
-TC-020 uses male, age 30, height 5 ft 10 in, weight 176 lb, 20% Body Fat and sedentary activity.
-
-## Verification
-
-All three tests passed together on September 16, 2026 in IntelliJ IDEA on Windows with Chrome 152. These tests depend on the live website; network problems or changes to its HTML can cause failures that need investigation.
+All three tests passed together in IntelliJ IDEA on Windows with Chrome 152 on September 16, 2026.
